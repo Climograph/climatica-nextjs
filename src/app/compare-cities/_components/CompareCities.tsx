@@ -17,6 +17,7 @@ import {
   encodeVars,
   scrollToSection,
 } from "@/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useEffect, useMemo, useRef } from "react";
@@ -24,6 +25,7 @@ import { CompareCitiesView } from "./CompareCitiesView";
 
 export function CompareCities() {
   const { autoScroll } = useAutoScroll();
+  const queryClient = useQueryClient();
   const userSelectedRef = useRef(false);
   const chartSectionRef = useRef<HTMLDivElement>(null);
   const { cityA, cityB, selectCityA, selectCityB } = usePersistedComparisonCities();
@@ -126,6 +128,7 @@ export function CompareCities() {
   function handleCityASelect(city: TWikidataCity) {
     userSelectedRef.current = true;
     selectCityA(city);
+    void queryClient.invalidateQueries({ queryKey: ["compare"] });
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.set(SIDEBAR_PARAMS.COMPARE_CITY_A, city.label);
     nextParams.set(SIDEBAR_PARAMS.LAT_A, city.lat.toFixed(4));
@@ -136,6 +139,7 @@ export function CompareCities() {
   function handleCityBSelect(city: TWikidataCity) {
     userSelectedRef.current = true;
     selectCityB(city);
+    void queryClient.invalidateQueries({ queryKey: ["compare"] });
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.set(SIDEBAR_PARAMS.COMPARE_CITY_B, city.label);
     nextParams.set(SIDEBAR_PARAMS.LAT_B, city.lat.toFixed(4));

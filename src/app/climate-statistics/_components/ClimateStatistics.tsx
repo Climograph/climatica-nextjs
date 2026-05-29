@@ -28,6 +28,7 @@ import {
   encodeVars,
   scrollToSection,
 } from "@/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -46,6 +47,7 @@ export function ClimateStatistics() {
     useResolveCityByCoordinates();
   const { locate, isLocating, locationError, clearLocationError } = useGeolocation();
   const { autoScroll } = useAutoScroll();
+  const queryClient = useQueryClient();
   const latestMapClickIdRef = useRef(0);
   const userSelectedRef = useRef(false);
   const chartSectionRef = useRef<HTMLDivElement>(null);
@@ -146,6 +148,7 @@ export function ClimateStatistics() {
     const name = resolveCityName(city);
     if (name) setChartCityName(name);
     selectCity(city);
+    void queryClient.invalidateQueries({ queryKey: ["climate"] });
 
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.set(SIDEBAR_PARAMS.CITY, city.label.trim());

@@ -36,6 +36,7 @@ import {
   parseYear,
   scrollToSection,
 } from "@/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -48,6 +49,7 @@ function resolvePeriodFromUrl(raw: string | null, fallback: TClimatePeriod): TCl
 
 export function ComparePeriods() {
   const { autoScroll } = useAutoScroll();
+  const queryClient = useQueryClient();
   const userSelectedRef = useRef(false);
   const chartSectionRef = useRef<HTMLDivElement>(null);
   const t = useTranslations();
@@ -203,6 +205,7 @@ export function ComparePeriods() {
   function handleCitySelect(city: TWikidataCity) {
     userSelectedRef.current = true;
     selectCityA(city);
+    void queryClient.invalidateQueries({ queryKey: ["compare-periods"] });
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set(SIDEBAR_PARAMS.CITY, city.label.trim());
     nextParams.set(SIDEBAR_PARAMS.LAT, city.lat.toFixed(4));
