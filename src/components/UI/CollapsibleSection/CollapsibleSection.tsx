@@ -42,7 +42,7 @@ export function CollapsibleSection({
         />
       </button>
 
-      {isOpen && <div className="flex flex-col gap-4">{children}</div>}
+      {isOpen && <div className="flex flex-col gap-8">{children}</div>}
     </div>
   );
 }
