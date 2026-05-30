@@ -12,13 +12,16 @@ import {
   useGetHeatmapData,
   useGetHeatmapPolygonData,
   useGetRegionalProfile,
+  usePersistedCity,
+  usePersistedComparisonCities,
 } from "@/hooks";
 import { useFiltersStore } from "@/stores";
 import type { TBbox, TColorScale, TWikidataCity } from "@/types";
 import { applyUrlFiltersToStore, createUrlParamHelpers, encodeVars } from "@/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/libs/I18nNavigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { TDrawMode, TMapTarget, TPolygon } from "./HeatMap.type";
 import { computeRegionalProfile, polygonToWkt, wktToPolygon } from "./HeatMap.util";
@@ -29,6 +32,10 @@ export function HeatMap() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const { city: persistedCity, selectCity } = usePersistedCity();
+  const isFirstRenderRef = useRef(true);
+  const { selectCityA } = usePersistedComparisonCities();
   const [drawMode, setDrawMode] = useState<TDrawMode>("none");
 
   // Restore polygon from URL on mount; lazy initializer reads searchParams once
@@ -47,6 +54,8 @@ export function HeatMap() {
     gridSize: grid,
     variables,
     months,
+    syncCity,
+    hasHydrated,
   } = useFiltersStore();
   const isClimate = dataset === DATASETS.CLIMATE;
   const year = isClimate ? undefined : weatherYear;
@@ -74,6 +83,16 @@ export function HeatMap() {
   useEffect(() => {
     applyUrlFiltersToStore(searchParams, useFiltersStore.getState().actions);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Center map when city is synced from another page
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    if (!syncCity || !hasHydrated) return;
+    setMapTarget({ lat: persistedCity.lat, lng: persistedCity.lng });
+  }, [persistedCity.lat, persistedCity.lng]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync filter params → URL (replace); separate from bbox/polygon writers
   const varsStr = useMemo(() => encodeVars(variables), [variables]);
@@ -158,6 +177,10 @@ export function HeatMap() {
 
   function handleDrawModeChange(mode: TDrawMode) {
     setDrawMode(mode);
+    if (mode !== "none") {
+      setPolygon(null);
+      applySelection(null, null);
+    }
   }
 
   function applySelection(nextBbox: TBbox | null, nextPolygon: TPolygon | null) {
@@ -201,6 +224,13 @@ export function HeatMap() {
 
   function handleCitySelect(city: TWikidataCity) {
     setMapTarget({ lat: city.lat, lng: city.lng });
+    if (syncCity) {
+      selectCity(city);
+      selectCityA(city);
+      void queryClient.invalidateQueries({ queryKey: ["climate"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare-periods"] });
+    }
   }
 
   function handleLocate() {
