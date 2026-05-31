@@ -30,8 +30,8 @@ def load_alternate_names():
 
     # * structure: geonameid -> lang -> (name, alt_id, is_preferred)
     # * we pick the best name per lang using priority:
-    # *   1. preferred=1 with highest alt_id (most recent preferred)
-    # *   2. any name with highest alt_id (most recent non-preferred)
+    # *   1. earliest entry with preferred=1
+    # *   2. earliest entry if no one has preferred=1
     names = defaultdict(lambda: {
         lang: {"name": None, "alt_id": 0, "preferred": False}
         for lang in TARGET_LANGS
@@ -56,8 +56,8 @@ def load_alternate_names():
             if lang not in TARGET_LANGS:
                 continue
 
-            # * is_preferred is column index 4 (value "1" means preferred)
-            is_preferred = len(parts) > 4 and parts[-1] == "1"
+            # * is_preferred is column index 4 or 5 (value "1" means preferred)
+            is_preferred = ((len(parts) > 4 and parts[4] == "1") or (len(parts) > 5 and parts[5] == "1"))
 
             current = names[geonameid][lang]
 
@@ -69,12 +69,13 @@ def load_alternate_names():
             elif is_preferred and not current["preferred"]:
                 # * new entry is preferred, current is not — upgrade
                 should_update = True
-            elif is_preferred and current["preferred"] and alt_id > current["alt_id"]:
+            # ! NO FURTHER PROCESSING
+            # elif is_preferred and current["preferred"] and alt_id > current["alt_id"]:
                 # * both preferred — take the more recent one
-                should_update = True
-            elif not is_preferred and not current["preferred"] and alt_id > current["alt_id"]:
+            #   should_update = True
+            # elif not is_preferred and not current["preferred"] and alt_id > current["alt_id"]:
                 # * neither preferred — take the more recent one
-                should_update = True
+            #   should_update = True
 
             if should_update:
                 names[geonameid][lang] = {

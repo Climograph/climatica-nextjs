@@ -6,8 +6,10 @@ import {
   useAutoScroll,
   useGetAltitude,
   useGetCompareData,
+  usePersistedCity,
   usePersistedComparisonCities,
 } from "@/hooks";
+import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useFiltersStore } from "@/stores";
 import type { TWikidataCity } from "@/types";
 import {
@@ -17,23 +19,33 @@ import {
   encodeVars,
   scrollToSection,
 } from "@/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useEffect, useMemo, useRef } from "react";
 import { CompareCitiesView } from "./CompareCitiesView";
 
 export function CompareCities() {
   const { autoScroll } = useAutoScroll();
+  const queryClient = useQueryClient();
   const userSelectedRef = useRef(false);
   const chartSectionRef = useRef<HTMLDivElement>(null);
   const { cityA, cityB, selectCityA, selectCityB } = usePersistedComparisonCities();
-  const { gridSize, dataset, climatePeriod, weatherYear, months, variables } = useFiltersStore();
+  const { selectCity: selectCityClimate } = usePersistedCity();
+  const {
+    gridSize,
+    dataset,
+    climatePeriod,
+    weatherYear,
+    months,
+    variables,
+    syncCity,
+    hasHydrated,
+  } = useFiltersStore();
   const selectedMonths = Array.isArray(months) ? months : null;
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Restore cities and filters from URL once on mount
   useEffect(() => {
     const urlCityA = cityFromUrl(
       searchParams.get(SIDEBAR_PARAMS.LAT_A),
@@ -52,7 +64,6 @@ export function CompareCities() {
     applyUrlFiltersToStore(searchParams, useFiltersStore.getState().actions);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync all shareable state → URL (replace)
   const varsStr = useMemo(() => encodeVars(variables), [variables]);
 
   useEffect(() => {
@@ -94,7 +105,6 @@ export function CompareCities() {
     pathname,
   ]);
 
-  // Document title
   useEffect(() => {
     const labelA = cityA.label;
     const labelB = cityB.label;
@@ -126,7 +136,17 @@ export function CompareCities() {
   function handleCityASelect(city: TWikidataCity) {
     userSelectedRef.current = true;
     selectCityA(city);
+
+    void queryClient.invalidateQueries({ queryKey: ["compare"] });
+
+    if (syncCity && hasHydrated) {
+      selectCityClimate(city);
+      void queryClient.invalidateQueries({ queryKey: ["climate"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare-periods"] });
+    }
+
     const nextParams = new URLSearchParams(searchParams.toString());
+
     nextParams.set(SIDEBAR_PARAMS.COMPARE_CITY_A, city.label);
     nextParams.set(SIDEBAR_PARAMS.LAT_A, city.lat.toFixed(4));
     nextParams.set(SIDEBAR_PARAMS.LNG_A, city.lng.toFixed(4));
@@ -136,7 +156,11 @@ export function CompareCities() {
   function handleCityBSelect(city: TWikidataCity) {
     userSelectedRef.current = true;
     selectCityB(city);
+
+    void queryClient.invalidateQueries({ queryKey: ["compare"] });
+
     const nextParams = new URLSearchParams(searchParams.toString());
+
     nextParams.set(SIDEBAR_PARAMS.COMPARE_CITY_B, city.label);
     nextParams.set(SIDEBAR_PARAMS.LAT_B, city.lat.toFixed(4));
     nextParams.set(SIDEBAR_PARAMS.LNG_B, city.lng.toFixed(4));

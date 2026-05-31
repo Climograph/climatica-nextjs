@@ -12,14 +12,17 @@ import {
   useGetHeatmapData,
   useGetHeatmapPolygonData,
   useGetRegionalProfile,
+  usePersistedCity,
+  usePersistedComparisonCities,
 } from "@/hooks";
+import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useFiltersStore } from "@/stores";
 import type { TBbox, TColorScale, TWikidataCity } from "@/types";
 import { applyUrlFiltersToStore, createUrlParamHelpers, encodeVars } from "@/utils";
-import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/libs/I18nNavigation";
-import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { TDrawMode, TMapTarget, TPolygon } from "./HeatMap.type";
 import { computeRegionalProfile, polygonToWkt, wktToPolygon } from "./HeatMap.util";
 import { HeatMapView } from "./HeatMapView";
@@ -29,9 +32,12 @@ export function HeatMap() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const { city: persistedCity, selectCity } = usePersistedCity();
+  const isFirstRenderRef = useRef(true);
+  const { selectCityA } = usePersistedComparisonCities();
   const [drawMode, setDrawMode] = useState<TDrawMode>("none");
 
-  // Restore polygon from URL on mount; lazy initializer reads searchParams once
   const [polygon, setPolygon] = useState<TPolygon | null>(() => {
     const raw = searchParams.get(SIDEBAR_PARAMS.POLYGON);
     return raw !== null ? wktToPolygon(raw) : null;
@@ -47,6 +53,8 @@ export function HeatMap() {
     gridSize: grid,
     variables,
     months,
+    syncCity,
+    hasHydrated,
   } = useFiltersStore();
   const isClimate = dataset === DATASETS.CLIMATE;
   const year = isClimate ? undefined : weatherYear;
@@ -55,7 +63,6 @@ export function HeatMap() {
   const activeVariable = variables[0] ?? "tmax";
   const colorScale: TColorScale = activeVariable === "prec" ? "precipitation" : "temperature";
 
-  // Bbox from URL search params
   const northRaw = searchParams.get(SIDEBAR_PARAMS.BBOX_NORTH);
   const southRaw = searchParams.get(SIDEBAR_PARAMS.BBOX_SOUTH);
   const westRaw = searchParams.get(SIDEBAR_PARAMS.BBOX_WEST);
@@ -70,12 +77,21 @@ export function HeatMap() {
         }
       : null;
 
-  // Restore global filters from URL once on mount
   useEffect(() => {
     applyUrlFiltersToStore(searchParams, useFiltersStore.getState().actions);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync filter params → URL (replace); separate from bbox/polygon writers
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    if (!syncCity || !hasHydrated) return;
+    setMapTarget({ lat: persistedCity.lat, lng: persistedCity.lng });
+  }, [persistedCity.lat, persistedCity.lng]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   const varsStr = useMemo(() => encodeVars(variables), [variables]);
 
   useEffect(() => {
@@ -106,7 +122,6 @@ export function HeatMap() {
     pathname,
   ]);
 
-  // Document title
   useEffect(() => {
     const varLabel = VARIABLE_LABELS[activeVariable] ?? activeVariable;
     const periodStr = isClimate
@@ -158,6 +173,10 @@ export function HeatMap() {
 
   function handleDrawModeChange(mode: TDrawMode) {
     setDrawMode(mode);
+    if (mode !== "none") {
+      setPolygon(null);
+      applySelection(null, null);
+    }
   }
 
   function applySelection(nextBbox: TBbox | null, nextPolygon: TPolygon | null) {
@@ -201,6 +220,13 @@ export function HeatMap() {
 
   function handleCitySelect(city: TWikidataCity) {
     setMapTarget({ lat: city.lat, lng: city.lng });
+    if (syncCity) {
+      selectCity(city);
+      selectCityA(city);
+      void queryClient.invalidateQueries({ queryKey: ["climate"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare-periods"] });
+    }
   }
 
   function handleLocate() {

@@ -260,6 +260,7 @@
       "to": "To"
     },
     "autoScroll": "Auto-scroll to results",
+    "syncCity": "Sync selected city across pages",
     "filters": "Filters",
     "settings": "Settings",
     "applyFilters": "Apply filters",
