@@ -22,9 +22,9 @@ import {
   getMartonneBadge,
 } from "@/utils";
 import { computeCompareStats, computeDiffStats } from "@/utils/climateComparison.util";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
-import { useTranslations } from "next-intl";
 import type { TCitySearchRowProps, TCompareCitiesViewProps } from "./CompareCities.type";
 
 const MiniMap = dynamic(
@@ -73,8 +73,26 @@ export function CompareCitiesView({
   const labelB = cityB.label;
 
   const miniMapLocations: TMiniMapLocation[] = [
-    { lat: cityA.lat, lng: cityA.lng, label: cityA.label, color: CLIMATE_COMPARISON_COLORS.A.tmax },
-    { lat: cityB.lat, lng: cityB.lng, label: cityB.label, color: CLIMATE_COMPARISON_COLORS.B.tmax },
+    ...(cityA?.lat && cityA?.lng
+      ? [
+          {
+            lat: cityA.lat,
+            lng: cityA.lng,
+            label: cityA.label,
+            color: CLIMATE_COMPARISON_COLORS.A.tmax,
+          },
+        ]
+      : []),
+    ...(cityB?.lat && cityB?.lng
+      ? [
+          {
+            lat: cityB.lat,
+            lng: cityB.lng,
+            label: cityB.label,
+            color: CLIMATE_COMPARISON_COLORS.B.tmax,
+          },
+        ]
+      : []),
   ];
 
   function handleExportCSV() {

@@ -51,6 +51,8 @@ export function Sidebar({ isOpen, onClose }: TSidebarProps) {
     variables,
     gridSize,
     months,
+    syncCity,
+    setSyncCity,
     actions: {
       setDataset,
       setClimatePeriod,
@@ -514,6 +516,11 @@ export function Sidebar({ isOpen, onClose }: TSidebarProps) {
             label={t("sidebar.autoScroll")}
             checked={autoScroll}
             onChange={toggleAutoScroll}
+          />
+          <ToggleSwitch
+            label={t("sidebar.syncCity")}
+            checked={syncCity}
+            onChange={() => setSyncCity(!syncCity)}
           />
         </CollapsibleSection>
       </div>

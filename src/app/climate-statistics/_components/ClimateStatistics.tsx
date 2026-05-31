@@ -16,6 +16,7 @@ import {
   useGetCellBounds,
   useGetClimateData,
   usePersistedCity,
+  usePersistedComparisonCities,
   useResolveCityByCoordinates,
 } from "@/hooks";
 import { useFiltersStore } from "@/stores";
@@ -43,6 +44,7 @@ function resolveCityName(city: TWikidataCity): string {
 export function ClimateStatistics() {
   const t = useTranslations();
   const { city: selectedCity, selectCity } = usePersistedCity();
+  const { selectCityA } = usePersistedComparisonCities();
   const { isLoading: isResolving, mutateAsync: resolveCityByCoordinates } =
     useResolveCityByCoordinates();
   const { locate, isLocating, locationError, clearLocationError } = useGeolocation();
@@ -55,8 +57,23 @@ export function ClimateStatistics() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { dataset, climatePeriod, weatherYear, gridSize, months, variables } = useFiltersStore();
+  const {
+    dataset,
+    climatePeriod,
+    weatherYear,
+    gridSize,
+    months,
+    variables,
+    syncCity,
+    hasHydrated,
+  } = useFiltersStore();
   const selectedMonths: number[] | null = Array.isArray(months) ? months : null;
+
+  useEffect(() => {
+    if (syncCity) {
+      void queryClient.invalidateQueries({ queryKey: ["climate"] });
+    }
+  }, [selectedCity.lat, selectedCity.lng]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [chartCityName, setChartCityName] = useState<string>(() => resolveCityName(selectedCity));
 
@@ -148,7 +165,11 @@ export function ClimateStatistics() {
     const name = resolveCityName(city);
     if (name) setChartCityName(name);
     selectCity(city);
-    void queryClient.invalidateQueries({ queryKey: ["climate"] });
+    if (syncCity && hasHydrated) {
+      selectCityA(city);
+      void queryClient.invalidateQueries({ queryKey: ["compare"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare-periods"] });
+    }
 
     const nextParams = new URLSearchParams(searchParams.toString());
     nextParams.set(SIDEBAR_PARAMS.CITY, city.label.trim());

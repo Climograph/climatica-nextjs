@@ -18,10 +18,11 @@ import {
   useGetAltitude,
   useGetComparePeriods,
   useGetMultiPeriodData,
-  useHasHydrated,
+  usePersistedCity,
   usePersistedComparisonCities,
   usePersistedPeriods,
 } from "@/hooks";
+import { usePathname, useRouter } from "@/libs/I18nNavigation";
 import { useFiltersStore } from "@/stores";
 import type { TClimatePeriod, TWikidataCity } from "@/types";
 import {
@@ -37,10 +38,9 @@ import {
   scrollToSection,
 } from "@/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/libs/I18nNavigation";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ComparePeriodsView } from "./ComparePeriodsView";
 
 function resolvePeriodFromUrl(raw: string | null, fallback: TClimatePeriod): TClimatePeriod {
@@ -53,16 +53,18 @@ export function ComparePeriods() {
   const userSelectedRef = useRef(false);
   const chartSectionRef = useRef<HTMLDivElement>(null);
   const t = useTranslations();
-  const isHydrated = useHasHydrated();
-  const { cityA, selectCityA } = usePersistedComparisonCities();
-  const { gridSize, dataset, months, variables } = useFiltersStore();
+  const { city, selectCity: selectCityA } = usePersistedCity();
+  const { selectCityA: selectCompareCityA } = usePersistedComparisonCities();
+  const { gridSize, dataset, months, variables, syncCity, hasHydrated } = useFiltersStore();
   const { locate, isLocating, locationError, clearLocationError } = useGeolocation();
   const selectedMonths = Array.isArray(months) ? months : null;
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Climate-only: 2 periods
+  const cityA = city;
+
+  // * 2 climate periods
   const [climatePeriodA, setClimatePeriodA] = useState<TClimatePeriod>(() =>
     resolvePeriodFromUrl(searchParams.get(SIDEBAR_PARAMS.PERIOD_A), CLIMATE_PERIODS.C1970_2000),
   );
@@ -70,10 +72,8 @@ export function ComparePeriods() {
     resolvePeriodFromUrl(searchParams.get(SIDEBAR_PARAMS.PERIOD_B), CLIMATE_PERIODS.C1991_2020),
   );
 
-  // Weather: N periods (2–5), persisted to localStorage
   const [periods, setPeriods] = usePersistedPeriods();
 
-  // Restore city, global filters, and periods from URL once on mount
   useEffect(() => {
     const urlCity = cityFromUrl(
       searchParams.get(SIDEBAR_PARAMS.LAT),
@@ -84,7 +84,6 @@ export function ComparePeriods() {
 
     applyUrlFiltersToStore(searchParams, useFiltersStore.getState().actions);
 
-    // URL periods take priority over localStorage
     const fromUrl = parsePeriods(searchParams.get(SIDEBAR_PARAMS.PERIODS));
     if (fromUrl !== null && fromUrl.length >= MIN_PERIODS) {
       setPeriods(fromUrl);
@@ -99,7 +98,6 @@ export function ComparePeriods() {
   const monthsStr = useMemo(() => encodeMonths(months), [months]);
   const periodsStr = useMemo(() => encodePeriods(periods), [periods]);
 
-  // Sync shareable state → URL
   useEffect(() => {
     const helper = createUrlParamHelpers(searchParams);
 
@@ -142,7 +140,6 @@ export function ComparePeriods() {
     pathname,
   ]);
 
-  // Document title
   useEffect(() => {
     const cityLabel = cityA.label;
     const validCity = cityLabel && !cityLabel.startsWith("url:") && !/^Q\d+$/.test(cityLabel);
@@ -160,7 +157,6 @@ export function ComparePeriods() {
     }
   }, [cityA.label, dataset, climatePeriodA, climatePeriodB, periods, variables]);
 
-  // Climate: fixed 2-period compare
   const {
     dataA,
     dataB,
@@ -177,7 +173,6 @@ export function ComparePeriods() {
     dataset,
   );
 
-  // Weather: N-period compare
   const {
     data: periodsData,
     isLoading: isWeatherLoading,
@@ -205,8 +200,17 @@ export function ComparePeriods() {
   function handleCitySelect(city: TWikidataCity) {
     userSelectedRef.current = true;
     selectCityA(city);
+
     void queryClient.invalidateQueries({ queryKey: ["compare-periods"] });
+
+    if (syncCity && hasHydrated) {
+      selectCompareCityA(city);
+      void queryClient.invalidateQueries({ queryKey: ["climate"] });
+      void queryClient.invalidateQueries({ queryKey: ["compare"] });
+    }
+
     const nextParams = new URLSearchParams(searchParams);
+
     nextParams.set(SIDEBAR_PARAMS.CITY, city.label.trim());
     nextParams.set(SIDEBAR_PARAMS.LAT, city.lat.toFixed(4));
     nextParams.set(SIDEBAR_PARAMS.LNG, city.lng.toFixed(4));
@@ -236,7 +240,7 @@ export function ComparePeriods() {
       city={cityA}
       altitude={altitude}
       dataset={dataset}
-      isHydrated={isHydrated}
+      isHydrated={hasHydrated}
       autoGrid={gridSize}
       selectedMonths={selectedMonths}
       isLoading={isLoading}

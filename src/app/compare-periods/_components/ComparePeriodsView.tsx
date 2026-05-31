@@ -37,9 +37,9 @@ import {
   getMartonneBadge,
 } from "@/utils";
 import { computeCompareStats } from "@/utils/climateComparison.util";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import { useRef } from "react";
-import { useTranslations } from "next-intl";
 import type { TClimatePeriodRowProps, TComparePeriodsViewProps } from "./ComparePeriods.type";
 
 const MiniMap = dynamic(
@@ -242,13 +242,13 @@ export function ComparePeriodsView({
               </div>
             )}
           </div>
-
-          <MiniMap locations={miniMapLocations} activeIndex={0} onToggle={() => undefined} />
+          {city?.lat && city?.lng && (
+            <MiniMap locations={miniMapLocations} activeIndex={0} onToggle={() => undefined} />
+          )}{" "}
         </div>
 
         {error && !isLoading && <ErrorBanner message={error.message} />}
 
-        {/* ── Climate: 2-period comparison ── */}
         {isClimate &&
           (isLoading ? (
             <div className="flex flex-col gap-2">
