@@ -1,9 +1,9 @@
 {
   "name": "Climatica",
   "version": "1.0.0",
-  "description": "Client part of web application to check, compare, analyze climate metrics",
+  "description": "Web application for exploring, comparing, and analyzing climate and weather metrics using WorldClim data",
   "author": {
-    "name": "Andrii Kononenko [Wastardy]",
+    "name": "Andrii Kononenko [wastxrq]",
     "email": "wastardy.k@gmail.com"
   },
   "private": true,
@@ -65,5 +65,18 @@
     "typescript": "^5",
     "typescript-eslint": "^8.48.0",
     "vitest": "^4.1.7"
-  }
+  },
+  "keywords": [
+    "climate",
+    "weather",
+    "worldclim",
+    "heatmaps",
+    "geonames",
+    "data visualization",
+    "next.js",
+    "react",
+    "solr",
+    "redis",
+    "i18n"
+  ]
 }

@@ -102,6 +102,23 @@ npm run docker:logs     # View Docker logs
 
 ---
 
+### Tests
+
+```bash
+npm run test              # run unit tests
+npm run test:coverage     # unit tests with coverage report
+npm run test:e2e          # E2E tests (requires Docker running + dev server)
+npm run test:e2e:ui       # E2E tests with Playwright UI
+```
+
+Unit tests cover: Redis client, caching strategies, cities route,
+WorldClim route, SolrService, WorldClimService, URL utils, city descriptions.
+
+E2E tests cover: city search, climate data loading, i18n switching,
+navigation, 404 page.
+
+---
+
 ## Developer Setup
 
 ### Tech Stack
@@ -116,7 +133,7 @@ npm run docker:logs     # View Docker logs
 | Tailwind CSS v4   | Styling                           |
 | Leaflet           | Interactive maps                  |
 | Recharts          | Charts                            |
-| i18next           | Multilingual support              |
+| next-intl         | Multilingual support              |
 | Solr 8            | City search database              |
 | Redis 7           | Server-side caching               |
 | ioredis           | Redis client                      |
@@ -196,4 +213,4 @@ npm run check   # type-check + lint + format
 
 Licensed under the terms in the [LICENSE](LICENSE) file.
 
-**Author**: Andrii Kononenko — wastardy.k@gmail.com
+**Author**: Andrii Kononenko [wastxrq] — wastardy.k@gmail.com

@@ -1,6 +1,6 @@
 import { APP_TITLE } from "@/constants";
-import { parseLocale, routing } from "@/libs/I18nRouting";
 import { AppLayout } from "@/layouts";
+import { parseLocale, routing } from "@/libs/I18nRouting";
 import "@/styles/global.css";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -27,7 +27,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning data-scroll-behavior="smooth">
       <body>
         <Providers>
           <NextIntlClientProvider>
