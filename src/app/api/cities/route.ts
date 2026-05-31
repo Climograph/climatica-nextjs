@@ -1,12 +1,16 @@
-import { CACHE_TTL } from "@/constants";
+import { CACHE_TTL, TIME } from "@/constants";
+import { getClientIp, rateLimitResponse } from "@/utils";
 import { logger } from "@/libs/Logger";
-import { REDIS_STRATEGIES } from "@/libs/redis";
+import { checkRateLimit, REDIS_STRATEGIES } from "@/libs/redis";
 import { RedisClient } from "@/libs/redis/client";
 import { SolrService, WikidataService } from "@/libs/services";
 import { type NextRequest, NextResponse } from "next/server";
 import { parseCoordinates } from "../@utils";
 
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit(ip, "cities", 60, TIME.IN_SECONDS.MINUTE);
+  if (!rl.allowed) return rateLimitResponse(rl);
   const q = request.nextUrl.searchParams.get("q")?.trim();
   const lang = request.nextUrl.searchParams.get("lang") ?? "en";
 

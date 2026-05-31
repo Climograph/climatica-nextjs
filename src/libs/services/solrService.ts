@@ -3,17 +3,15 @@ import "server-only";
 import { env } from "@/libs/Env";
 import { logger } from "@/libs/Logger";
 import type { TSolrCityDoc, TSolrResponse, TWikidataCity } from "@/types";
-import { buildQueryParams, getCityDescription } from "@/utils";
+import { buildSolrQueryParams, getCityDescription } from "@/utils"; // removed buildQueryParams
 
 const SOLR_BASE_URL = env.SOLR_URL;
 
 export const SolrService = {
   async searchCities(query: string, lang: string): Promise<TWikidataCity[]> {
-    const labelField = SolrService.getLabelField(lang);
+    const params = buildSolrQueryParams(query, lang);
 
-    const params = new URLSearchParams(buildQueryParams(query, labelField));
-
-    const url = `${SOLR_BASE_URL}/solr/cities/select?${params}`;
+    const url = `${SOLR_BASE_URL}/solr/cities/cities?${params}`;
     const start = Date.now();
 
     try {

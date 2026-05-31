@@ -1,7 +1,6 @@
 export { buildQueryParams } from "./buildQueryParams.util";
-export { buildClimateStatsRows } from "./climateExport.util";
-export { buildHeatmapResults } from "./heatmapResults.util";
 export { estimateCellCount, getCellCountStatus } from "./cellCount.util";
+export { buildClimateStatsRows } from "./climateExport.util";
 export { getColorStops, interpolateColor } from "./colorScale.util";
 export { cssVar, hexToRgb } from "./cssVar.util";
 export {
@@ -13,8 +12,12 @@ export {
   exportToSVG,
 } from "./export.util";
 export { getCityDescription } from "./geonames.util";
+export { buildHeatmapResults } from "./heatmapResults.util";
 export { getMartonneBadge } from "./martonne.util";
 export { scrollToSection } from "./scroll.util";
+export { getClientIp } from "./getClientIp.util";
+export { rateLimitResponse } from "./rateLimitResponse.util";
+export { buildSolrQueryParams } from "./solr.util";
 export {
   applyUrlFiltersToStore,
   cityFromUrl,

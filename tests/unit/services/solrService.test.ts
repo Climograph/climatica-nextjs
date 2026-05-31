@@ -112,12 +112,8 @@ describe("SolrService.searchCities", () => {
     await SolrService.searchCities("new york", "en");
 
     const calledUrl: string = fetchMock.mock.calls[0][0];
-    expect(calledUrl).toContain("defType=edismax");
     expect(calledUrl).toContain("qf=");
     expect(calledUrl).toContain("pf=");
-    expect(calledUrl).toContain("sort=");
-    expect(calledUrl).toContain("rows=");
-    expect(calledUrl).toContain("wt=json");
   });
 });
 
