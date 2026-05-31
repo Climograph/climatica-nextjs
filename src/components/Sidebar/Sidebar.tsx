@@ -21,15 +21,15 @@ import {
 } from "@/constants";
 import { EButtonVariant } from "@/enums";
 import { useAutoScroll, usePersistedPeriods } from "@/hooks";
+import { usePathname } from "@/libs/I18nNavigation";
 import { useFiltersStore } from "@/stores";
 import type { TCellSize, TCellSizeOption } from "@/types";
 import { estimateCellCount, getCellCountStatus } from "@/utils";
 import { sidebarFiltersSchema } from "@/validators";
 import { useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
-import { usePathname } from "@/libs/I18nNavigation";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { TDraftErrors, TDraftFilters, TSidebarProps } from "./Sidebar.type";
 
 const CLIMATE_PERIOD_OPTIONS = Object.values(CLIMATE_PERIODS).map((period) => ({
@@ -511,7 +511,12 @@ export function Sidebar({ isOpen, onClose }: TSidebarProps) {
           </div>
         </CollapsibleSection>
 
-        <CollapsibleSection title={t("sidebar.settings")} defaultOpen={false} withDivider>
+        <CollapsibleSection
+          title={t("sidebar.settings")}
+          defaultOpen={false}
+          withDivider
+          gapBetweenOptions="gap-2"
+        >
           <ToggleSwitch
             label={t("sidebar.autoScroll")}
             checked={autoScroll}
