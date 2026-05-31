@@ -1,8 +1,8 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import type { CircleMarker as LCircleMarker, Map as LMap } from "leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { useEffect, useRef } from "react";
 import type { TMiniMapLocation, TMiniMapProps } from "./MiniMap.type";
 
@@ -11,44 +11,73 @@ export function MiniMap({ locations, activeIndex, onToggle }: TMiniMapProps) {
   const mapRef = useRef<LMap | null>(null);
   const markersRef = useRef<LCircleMarker[]>([]);
 
-  // Init once — guard prevents React Strict Mode double-invoke
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current) return;
 
-    const initialCenter: [number, number] =
-      locations.length > 0 ? [locations[0].lat, locations[0].lng] : [0, 0];
+    let map: LMap | null = null;
 
-    const map = L.map(containerRef.current, {
-      center: initialCenter,
-      zoom: 6,
-      zoomControl: false,
-      attributionControl: false,
-      scrollWheelZoom: false,
-      dragging: false,
-      doubleClickZoom: false,
-      keyboard: false,
-      boxZoom: false,
-      touchZoom: false,
+    function initMap(container: HTMLDivElement) {
+      if (mapRef.current) return;
+      if (container.offsetWidth === 0 || container.offsetHeight === 0) return;
+
+      const initialCenter: [number, number] =
+        locations.length > 0 ? [locations[0].lat, locations[0].lng] : [0, 0];
+
+      map = L.map(container, {
+        center: initialCenter,
+        zoom: 6,
+        zoomControl: false,
+        attributionControl: false,
+        scrollWheelZoom: false,
+        dragging: false,
+        doubleClickZoom: false,
+        keyboard: false,
+        boxZoom: false,
+        touchZoom: false,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+      mapRef.current = map;
+
+      setTimeout(() => map?.invalidateSize(), 0);
+    }
+
+    const container = containerRef.current;
+
+    initMap(container);
+
+    const observer = new ResizeObserver(() => {
+      if (!mapRef.current) {
+        initMap(container);
+      } else {
+        mapRef.current.invalidateSize();
+      }
     });
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-    mapRef.current = map;
+    observer.observe(container);
 
     return () => {
-      map.remove();
-      mapRef.current = null;
-      markersRef.current = [];
+      observer.disconnect();
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markersRef.current = [];
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!mapRef.current || locations.length === 0) return;
+    const map = mapRef.current;
+
+    try {
+      map.getContainer();
+    } catch {
+      return;
+    }
 
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
-
-    const map = mapRef.current;
 
     markersRef.current = locations.map((loc: TMiniMapLocation, i: number) =>
       L.circleMarker([loc.lat, loc.lng], {

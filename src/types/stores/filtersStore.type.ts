@@ -12,6 +12,8 @@ export type TFiltersData = {
 export type TFiltersState = TFiltersData & {
   hasHydrated: boolean;
   setHasHydrated: (hydrated: boolean) => void;
+  syncCity: boolean;
+  setSyncCity: (value: boolean) => void;
   actions: {
     setDataset: (d: TDataset) => void;
     setClimatePeriod: (period: TClimatePeriod) => void;

@@ -27,6 +27,8 @@ export const useFiltersStore = create<TFiltersState>()(
       ...DEFAULT_FILTERS,
       hasHydrated: false,
       setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
+      syncCity: true,
+      setSyncCity: (value) => set({ syncCity: value }),
       actions: {
         setDataset: (dataset) =>
           set((state) => {
@@ -96,6 +98,7 @@ export const useFiltersStore = create<TFiltersState>()(
         variables: state.variables,
         gridSize: state.gridSize,
         months: state.months,
+        syncCity: state.syncCity,
       }),
     },
   ),

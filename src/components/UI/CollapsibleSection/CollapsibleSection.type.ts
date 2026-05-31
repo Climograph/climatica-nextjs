@@ -5,4 +5,5 @@ export type TCollapsibleSectionProps = {
   defaultOpen?: boolean;
   withDivider?: boolean;
   children: ReactNode;
+  gapBetweenOptions?: string;
 };

@@ -21,6 +21,7 @@ export function CollapsibleSection({
   defaultOpen = true,
   withDivider = false,
   children,
+  gapBetweenOptions = "gap-8",
 }: TCollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -42,7 +43,7 @@ export function CollapsibleSection({
         />
       </button>
 
-      {isOpen && <div className="flex flex-col gap-4">{children}</div>}
+      {isOpen && <div className={`flex flex-col ${gapBetweenOptions}`}>{children}</div>}
     </div>
   );
 }
