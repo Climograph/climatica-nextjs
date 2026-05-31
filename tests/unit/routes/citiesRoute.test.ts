@@ -10,6 +10,15 @@ vi.mock("@/libs/services", () => ({
   SolrService: { searchCities: vi.fn() },
   WikidataService: { findNearestCityByCoordinates: vi.fn() },
 }));
+vi.mock("@/libs/Env", () => ({
+  env: {
+    WORLDCLIM_API_KEY: "test-key",
+    REDIS_URL: "redis://localhost:6379",
+    SOLR_URL: "http://localhost:8983",
+    PORT: "3000",
+    NODE_ENV: "test",
+  },
+}));
 
 import { GET } from "@/app/api/cities/route";
 import { REDIS_STRATEGIES } from "@/libs/redis";
