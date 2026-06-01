@@ -146,14 +146,6 @@
     "martonneTooltip": "Índice de aridez de De Martonne: M = P/(T+10). <5 Hiperárido | 5–10 Árido | 10–20 Semiárido | 20–30 Subhúmedo | >30 Húmedo",
     "aridPeriod": "Período árido",
     "humidPeriod": "Período húmedo",
-    "martonneClass": {
-      "hyperarid": "Hiperárido",
-      "arid": "Árido",
-      "semiArid": "Semiárido",
-      "subHumid": "Subhúmedo",
-      "humid": "Húmedo",
-      "perhumid": "Perhúmedo"
-    },
     "modeStandard": "Gráfico estándar",
     "modeWalterLieth": "Diagrama Walter-Lieth",
     "walterLiethTabUnavailable": "No disponible en la vista Walter-Lieth",
@@ -292,5 +284,14 @@
     "title": "Página no encontrada",
     "subtitle": "La página que buscas no existe o ha sido movida.",
     "goHome": "Ir a Estadísticas Climáticas"
+  },
+  "martonne": {
+    "arid": "Árido",
+    "semiArid": "Semiárido",
+    "mediterranean": "Mediterráneo",
+    "semiHumid": "Semihúmedo",
+    "humid": "Húmedo",
+    "veryHumid": "Muy húmedo",
+    "extremelyHumid": "Extremadamente húmedo"
   }
 }
