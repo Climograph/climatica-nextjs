@@ -1,4 +1,6 @@
 export { APP_CONFIG, APP_TITLE } from "./app.constant";
+export { MARTONNE_CLASSES } from "./martonne.constant";
+export type { TMartonnClass } from "./martonne.constant";
 export type { TLocale } from "./app.constant";
 export {
   ENDPOINTS,

@@ -146,14 +146,6 @@
     "martonneTooltip": "De Martonne aridity index: M = P/(T+10). <5 Hyperarid | 5–10 Arid | 10–20 Semi-arid | 20–30 Sub-humid | >30 Humid",
     "aridPeriod": "Arid period",
     "humidPeriod": "Humid period",
-    "martonneClass": {
-      "hyperarid": "Hyperarid",
-      "arid": "Arid",
-      "semiArid": "Semi-arid",
-      "subHumid": "Sub-humid",
-      "humid": "Humid",
-      "perhumid": "Perhumid"
-    },
     "modeStandard": "Standard chart",
     "modeWalterLieth": "Walter-Lieth diagram",
     "walterLiethTabUnavailable": "Not available in Walter-Lieth view",
@@ -292,5 +284,14 @@
     "title": "Page not found",
     "subtitle": "The page you're looking for doesn't exist or has been moved.",
     "goHome": "Go to Climate Statistics"
+  },
+  "martonne": {
+    "arid": "Arid",
+    "semiArid": "Semi-arid",
+    "mediterranean": "Mediterranean",
+    "semiHumid": "Semi-humid",
+    "humid": "Humid",
+    "veryHumid": "Very-humid",
+    "extremelyHumid": "Extremely humid"
   }
 }

@@ -140,9 +140,10 @@ export function StandardClimateChart({
                 }}
                 labelFormatter={localMonthName}
                 formatter={(value, name) => {
-                  const v = Array.isArray(value) ? value.join(", ") : String(value ?? "");
+                  const num = Number(value ?? "");
+                  const formatted = isNaN(num) ? String(value ?? "") : num.toFixed(2);
                   const isPrecip = String(name).includes(t("chart.precipitation"));
-                  return [isPrecip ? `${v} mm` : `${v} °C`, name];
+                  return [isPrecip ? `${formatted} mm` : `${formatted} °C`, name];
                 }}
               />
 

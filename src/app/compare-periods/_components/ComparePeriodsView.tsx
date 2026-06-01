@@ -34,7 +34,7 @@ import {
   buildFilename,
   exportElementToPng,
   exportTableToCsv,
-  getMartonneBadge,
+  getMartonneLabelKey,
 } from "@/utils";
 import { computeCompareStats } from "@/utils/climateComparison.util";
 import { useTranslations } from "next-intl";
@@ -117,8 +117,6 @@ export function ComparePeriodsView({
 
   function handleClimateExportCSV() {
     if (!statsA || !statsB) return;
-    const badgeA = getMartonneBadge(statsA.martonneIndex);
-    const badgeB = getMartonneBadge(statsB.martonneIndex);
     const rows = buildClimateStatsRows(
       [statsA, statsB],
       [
@@ -134,10 +132,10 @@ export function ComparePeriodsView({
     rows.push([
       t("climateComparison.stats.martonne"),
       statsA.martonneIndex !== null
-        ? `${statsA.martonneIndex.toFixed(1)} (${badgeA?.labelKey ?? ""})`
+        ? `${statsA.martonneIndex.toFixed(1)} (${t(getMartonneLabelKey(statsA.martonneIndex))})`
         : "—",
       statsB.martonneIndex !== null
-        ? `${statsB.martonneIndex.toFixed(1)} (${badgeB?.labelKey ?? ""})`
+        ? `${statsB.martonneIndex.toFixed(1)} (${t(getMartonneLabelKey(statsB.martonneIndex))})`
         : "—",
     ]);
     exportTableToCsv(
