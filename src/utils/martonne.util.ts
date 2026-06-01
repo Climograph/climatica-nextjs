@@ -1,34 +1,23 @@
-import { TMartonneBadge } from "@/types";
+import { MARTONNE_CLASSES } from "@/constants";
+import type { TMartonnClass } from "@/constants/martonne.constant";
+import type { TMartonneBadge } from "@/types";
 
-const MARTONNE_THRESHOLDS = [
-  {
-    threshold: 5,
-    badge: { labelKey: "chart.martonneClass.hyperarid", bg: "#f8d7da", color: "#842029" },
-  },
-  {
-    threshold: 10,
-    badge: { labelKey: "chart.martonneClass.arid", bg: "#fde8d0", color: "#7d3c00" },
-  },
-  {
-    threshold: 20,
-    badge: { labelKey: "chart.martonneClass.semiArid", bg: "#fff3cd", color: "#664d03" },
-  },
-  {
-    threshold: 30,
-    badge: { labelKey: "chart.martonneClass.subHumid", bg: "#d1f0e0", color: "#0a4d2e" },
-  },
-  {
-    threshold: 35,
-    badge: { labelKey: "chart.martonneClass.humid", bg: "#cfe2ff", color: "#084298" },
-  },
-  {
-    threshold: Infinity,
-    badge: { labelKey: "chart.martonneClass.perhumid", bg: "#e2d9f3", color: "#3d1a78" },
-  },
-] as const;
+export function getMartonneBadge(idm: number): TMartonneBadge {
+  const key = getMartonnClass(idm);
+  const { labelKey, bg, color } = MARTONNE_CLASSES[key];
+  return { labelKey, bg, color };
+}
 
-export function getMartonneBadge(martonneIndex: number | null): TMartonneBadge | null {
-  if (martonneIndex === null || isNaN(martonneIndex)) return null;
+export function getMartonneLabelKey(idm: number): string {
+  return getMartonneBadge(idm).labelKey;
+}
 
-  return MARTONNE_THRESHOLDS.find(({ threshold }) => martonneIndex < threshold)?.badge ?? null;
+function getMartonnClass(idm: number): TMartonnClass {
+  if (idm < 10) return "arid";
+  if (idm < 20) return "semiArid";
+  if (idm < 24) return "mediterranean";
+  if (idm < 28) return "semiHumid";
+  if (idm < 35) return "humid";
+  if (idm <= 55) return "veryHumid";
+  return "extremelyHumid";
 }

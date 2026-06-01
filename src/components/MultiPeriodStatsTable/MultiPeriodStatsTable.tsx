@@ -1,6 +1,6 @@
 import type { TCompareStats } from "@/types";
 import { computeCompareStats } from "@/utils/climateComparison.util";
-import { getMartonneBadge } from "@/utils/martonne.util";
+import { getMartonneLabelKey } from "@/utils/martonne.util";
 import { useTranslations } from "next-intl";
 import type { TMultiPeriodStatsTableProps } from "./MultiPeriodStatsTable.type";
 
@@ -142,7 +142,6 @@ export function MultiPeriodStatsTable({
                 );
               }
               const stats = statsMap.get(year);
-              const badge = stats !== undefined ? getMartonneBadge(stats.martonneIndex) : null;
               return (
                 <td
                   key={year}
@@ -153,17 +152,12 @@ export function MultiPeriodStatsTable({
                     {stats !== undefined && stats.martonneIndex !== null
                       ? stats.martonneIndex.toFixed(1)
                       : "—"}
-                    {badge && (
+                    {stats !== undefined && stats.martonneIndex !== null && (
                       <span
                         className="text-[10px] font-medium"
-                        style={{
-                          backgroundColor: badge.bg,
-                          color: badge.color,
-                          padding: "2px 6px",
-                          borderRadius: 8,
-                        }}
+                        style={{ padding: "2px 6px", borderRadius: 8 }}
                       >
-                        {t(badge.labelKey)}
+                        {t(getMartonneLabelKey(stats.martonneIndex))}
                       </span>
                     )}
                   </span>

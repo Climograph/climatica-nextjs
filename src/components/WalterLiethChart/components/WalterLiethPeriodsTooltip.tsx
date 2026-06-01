@@ -33,10 +33,10 @@ export function WalterLiethPeriodsTooltip({
             {labelA}
           </p>
           <p style={{ color: WL_COLORS_A.tempLineColor }}>
-            {t("chart.avgTemperature")}: {ptA.tavg.toFixed(1)}°C
+            {t("chart.avgTemperature")}: {ptA.tavg.toFixed(2)}°C
           </p>
           <p style={{ color: WL_COLORS_A.precLineColor }}>
-            {t("chart.precipitation")}: {Math.round(ptA.prec)} mm
+            {t("chart.precipitation")}: {ptA.prec.toFixed(2)} mm
           </p>
         </div>
       )}
@@ -46,10 +46,10 @@ export function WalterLiethPeriodsTooltip({
             {labelB}
           </p>
           <p style={{ color: WL_COLORS_B.tempLineColor }}>
-            {t("chart.avgTemperature")}: {ptB.tavg.toFixed(1)}°C
+            {t("chart.avgTemperature")}: {ptB.tavg.toFixed(2)}°C
           </p>
           <p style={{ color: WL_COLORS_B.precLineColor }}>
-            {t("chart.precipitation")}: {Math.round(ptB.prec)} mm
+            {t("chart.precipitation")}: {ptB.prec.toFixed(2)} mm
           </p>
         </div>
       )}
