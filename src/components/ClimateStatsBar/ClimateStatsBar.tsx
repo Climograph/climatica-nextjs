@@ -1,4 +1,4 @@
-import { getMartonneBadge } from "@/utils/martonne.util";
+import { getMartonneBadge } from "@/utils";
 import { useTranslations } from "next-intl";
 import type { TClimateStatsBarProps, TDualValueProps } from "./ClimateStatsBar.type";
 
@@ -30,18 +30,6 @@ export function ClimateStatsBar({
   const colCount = showAltitude ? 5 : 4;
 
   const pColor = primaryColor ?? "var(--color-text)";
-
-  // Single-entity mode badge
-  const badge = !isCompare ? getMartonneBadge(martonneIndex) : null;
-
-  // Comparison mode: background from the more arid (lower M) of the two
-  const primaryM = martonneIndex ?? Infinity;
-  const compM = isCompare ? (comparison.martonneIndex ?? Infinity) : Infinity;
-  const aridBadge = isCompare
-    ? getMartonneBadge(primaryM <= compM ? martonneIndex : comparison.martonneIndex)
-    : null;
-
-  const activeBadge = isCompare ? aridBadge : badge;
 
   return (
     <div
@@ -136,13 +124,9 @@ export function ClimateStatsBar({
 
       <div
         className="flex items-center justify-between px-4 py-[10px]"
-        style={activeBadge ? { backgroundColor: activeBadge.bg } : {}}
         title={t("chart.martonneTooltip")}
       >
-        <span
-          className="text-[11px]"
-          style={{ color: activeBadge ? activeBadge.color : "var(--color-text-secondary)" }}
-        >
+        <span className="text-[11px] text-[var(--color-text-secondary)]">
           {t("chart.martonne")}
         </span>
         {isCompare ? (
@@ -155,16 +139,23 @@ export function ClimateStatsBar({
         ) : (
           <span className="flex items-center gap-1.5">
             <span
-              className="text-[16px] font-medium tabular-nums"
-              style={{ color: badge ? badge.color : "var(--color-text)", cursor: "help" }}
+              className="text-[16px] font-medium tabular-nums text-[var(--color-text)]"
+              style={{ cursor: "help" }}
             >
               {martonneIndex !== null ? martonneIndex.toFixed(1) : "—"}
             </span>
-            {badge && (
-              <span className="text-[10px] font-medium" style={{ color: badge.color }}>
-                {t(badge.labelKey)}
-              </span>
-            )}
+            {martonneIndex !== null &&
+              (() => {
+                const badge = getMartonneBadge(martonneIndex);
+                return (
+                  <span
+                    className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                    style={{ backgroundColor: badge.bg, color: badge.color }}
+                  >
+                    {t(badge.labelKey)}
+                  </span>
+                );
+              })()}
           </span>
         )}
       </div>

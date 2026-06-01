@@ -20,10 +20,10 @@ export function WalterLiethTooltip({ active, label, wlData }: TWLTooltipProps) {
     >
       <p className="mb-1 font-semibold text-[var(--color-text)]">{displayLabel}</p>
       <p style={{ color: "var(--color-wl-temp-line-a)" }}>
-        {t("chart.avgTemperature")}: {point.tavg.toFixed(1)}°C
+        {t("chart.avgTemperature")}: {point.tavg.toFixed(2)}°C
       </p>
       <p style={{ color: "var(--color-wl-prec-line-a)" }}>
-        {t("chart.precipitation")}: {Math.round(point.prec)} mm
+        {t("chart.precipitation")}: {point.prec.toFixed(2)} mm
       </p>
       <p
         className="mt-1"
