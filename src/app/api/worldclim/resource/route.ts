@@ -1,13 +1,13 @@
 import { CACHE_KEYS, TIME } from "@/constants";
-import { getClientIp, rateLimitResponse } from "@/utils";
 import { env } from "@/libs/Env";
 import { checkRateLimit, REDIS_STRATEGIES } from "@/libs/redis";
 import { RedisClient } from "@/libs/redis/client";
+import { getClientIp, rateLimitResponse } from "@/utils";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const ip = getClientIp(request);
-  const rl = await checkRateLimit(ip, "worldclim-resource", 30, TIME.IN_SECONDS.MINUTE);
+  const rl = await checkRateLimit(ip, "worldclim-resource", 1000, TIME.IN_SECONDS.MINUTE);
   if (!rl.allowed) return rateLimitResponse(rl);
   const searchParams = request.nextUrl.searchParams.toString();
   const url = `https://scrapi.gsic.uva.es/apis/worldclim/resource?${searchParams}`;
