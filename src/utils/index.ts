@@ -13,7 +13,7 @@ export {
 } from "./export.util";
 export { getCityDescription } from "./geonames.util";
 export { buildHeatmapResults } from "./heatmapResults.util";
-export { getMartonneBadge } from "./martonne.util";
+export { getMartonneBadge, getMartonneLabelKey } from "./martonne.util";
 export { scrollToSection } from "./scroll.util";
 export { getClientIp } from "./getClientIp.util";
 export { rateLimitResponse } from "./rateLimitResponse.util";

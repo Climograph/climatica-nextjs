@@ -1,4 +1,4 @@
-import { getMartonneBadge } from "@/utils/martonne.util";
+import { getMartonneLabelKey } from "@/utils/martonne.util";
 import { CLIMATE_COMPARISON_COLORS } from "@/constants";
 import { useTranslations } from "next-intl";
 import type { TCompareStatsGridProps } from "./CompareStatsGrid.type";
@@ -13,9 +13,6 @@ export function CompareStatsGrid({
   activeColumn,
 }: TCompareStatsGridProps) {
   const t = useTranslations();
-
-  const badgeA = getMartonneBadge(statsA.martonneIndex);
-  const badgeB = getMartonneBadge(statsB.martonneIndex);
 
   const rows = [
     {
@@ -128,17 +125,12 @@ export function CompareStatsGrid({
             >
               <span className="inline-flex items-center gap-1.5">
                 {statsA.martonneIndex !== null ? statsA.martonneIndex.toFixed(1) : "—"}
-                {badgeA && (
+                {statsA.martonneIndex !== null && (
                   <span
                     className="text-[10px] font-medium"
-                    style={{
-                      backgroundColor: badgeA.bg,
-                      color: badgeA.color,
-                      padding: "2px 6px",
-                      borderRadius: 8,
-                    }}
+                    style={{ padding: "2px 6px", borderRadius: 8 }}
                   >
-                    {t(badgeA.labelKey)}
+                    {t(getMartonneLabelKey(statsA.martonneIndex))}
                   </span>
                 )}
               </span>
@@ -149,17 +141,12 @@ export function CompareStatsGrid({
             >
               <span className="inline-flex items-center gap-1.5">
                 {statsB.martonneIndex !== null ? statsB.martonneIndex.toFixed(1) : "—"}
-                {badgeB && (
+                {statsB.martonneIndex !== null && (
                   <span
                     className="text-[10px] font-medium"
-                    style={{
-                      backgroundColor: badgeB.bg,
-                      color: badgeB.color,
-                      padding: "2px 6px",
-                      borderRadius: 8,
-                    }}
+                    style={{ padding: "2px 6px", borderRadius: 8 }}
                   >
-                    {t(badgeB.labelKey)}
+                    {t(getMartonneLabelKey(statsB.martonneIndex))}
                   </span>
                 )}
               </span>

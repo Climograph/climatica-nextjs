@@ -19,7 +19,7 @@ import {
   buildFilename,
   exportElementToPng,
   exportTableToCsv,
-  getMartonneBadge,
+  getMartonneLabelKey,
 } from "@/utils";
 import { computeCompareStats, computeDiffStats } from "@/utils/climateComparison.util";
 import { useTranslations } from "next-intl";
@@ -97,8 +97,6 @@ export function CompareCitiesView({
 
   function handleExportCSV() {
     if (!statsA || !statsB) return;
-    const badgeA = getMartonneBadge(statsA.martonneIndex);
-    const badgeB = getMartonneBadge(statsB.martonneIndex);
     const showAltitude = altitudeA != null || altitudeB != null;
     const rows = buildClimateStatsRows(
       [statsA, statsB],
@@ -119,10 +117,10 @@ export function CompareCitiesView({
     rows.push([
       t("climateComparison.stats.martonne"),
       statsA.martonneIndex !== null
-        ? `${statsA.martonneIndex.toFixed(1)} (${badgeA?.labelKey ?? ""})`
+        ? `${statsA.martonneIndex.toFixed(1)} (${t(getMartonneLabelKey(statsA.martonneIndex))})`
         : "—",
       statsB.martonneIndex !== null
-        ? `${statsB.martonneIndex.toFixed(1)} (${badgeB?.labelKey ?? ""})`
+        ? `${statsB.martonneIndex.toFixed(1)} (${t(getMartonneLabelKey(statsB.martonneIndex))})`
         : "—",
     ]);
     exportTableToCsv(
