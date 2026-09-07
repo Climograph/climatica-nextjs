@@ -1,48 +1,51 @@
 import "server-only";
 
 import { TIME } from "@/constants";
+import { isRecoverableRedisError } from "@/utils";
 import Redis from "ioredis";
 import { env } from "../Env";
 import { logger } from "../Logger";
 
-export class RedisClient {
-  private static instance: Redis;
+const singletonsRedisInstance = globalThis as unknown as { __redisInstance?: Redis };
 
+export class RedisClient {
   private constructor() {}
 
   public static getInstance(): Redis {
-    if (!RedisClient.instance) {
+    if (!singletonsRedisInstance.__redisInstance) {
       const redisUrl = env.REDIS_URL;
 
-      RedisClient.instance = new Redis(redisUrl, {
+      const instance = new Redis(redisUrl, {
         maxRetriesPerRequest: 3,
         retryStrategy(times) {
-          if (times >= 3) {
+          if (times >= 10) {
             logger.error("[Redis] Max retries reached");
             return null;
           }
 
-          // * exponential backoff, e.g., 100ms, 200ms, 400ms
-          return Math.pow(2, times) * TIME.IN_MILLISECONDS.ONE_HUNDRED_MS;
+          // * exponential backoff, capped at 2s
+          return Math.min(Math.pow(2, times) * TIME.IN_MILLISECONDS.ONE_HUNDRED_MS, 2000);
         },
         reconnectOnError(error) {
           logger.error(`[Redis] Connection error: ${error.message}`);
-          return true;
+          return isRecoverableRedisError(error.message);
         },
         lazyConnect: true,
         enableOfflineQueue: true,
       });
 
-      RedisClient.instance.on("connect", () => {
+      instance.on("connect", () => {
         logger.info("[Redis] Connected");
       });
 
-      RedisClient.instance.on("error", (error) => {
+      instance.on("error", (error) => {
         logger.error(`[Redis] Error: ${error.message}`);
       });
+
+      singletonsRedisInstance.__redisInstance = instance;
     }
 
-    return RedisClient.instance;
+    return singletonsRedisInstance.__redisInstance;
   }
 
   public static async get<T>(key: string): Promise<T | null> {
